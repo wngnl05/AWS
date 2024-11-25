@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: employee
+  namespace: app
+  labels:
+    app: employee  # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: employee # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+  template:
+    metadata:
+      labels:
+        app: employee  # 각 Pod에 할당되는 레이블
+    spec:
+      nodeSelector: # Fargate Profile을 사용할 시 삭제
+        wsi: app
+      serviceAccountName: app
+      containers:
+        - name: ctn
+          image: <이미지>
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1100m
+            requests:
+              cpu: 900m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: token
+  namespace: app
+  labels:
+    app: token  # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: token # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+  template:
+    metadata:
+      labels:
+        app: token  # 각 Pod에 할당되는 레이블
+    spec:
+      nodeSelector: # Fargate Profile을 사용할 시 삭제
+        wsi: app
+      serviceAccountName: app
+      containers:
+        - name: ctn
+          image: <이미지>
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1000m
+            requests:
+              cpu: 800m

@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: <deployment 이름>
+  namespace: <namespace 이름>
+  labels:
+    <key> : <value>  # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+    
+spec:
+  replicas: <생성할 파드 수>
+  selector:
+    matchLabels:
+      <key> : <value> # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+      
+  template:
+    metadata:
+      labels:
+        <Pod Key> : <Pod Value> # 각 Pod에 할당되는 레이블
+        
+    spec:
+      nodeSelector: # Fargate Profile을 사용할 시 삭제
+        <Node key>: <Node Value>
+        
+      serviceAccountName: <ServiceAccount 이름>
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: aws-secret
+            
+      containers:
+        - name: <컨테이너 이름>
+          image: <Docekr 이미지 경로>
+          ports:
+          - containerPort: <애플리케이션 포트>
+
+          env: 
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: wngnl-secret # SecretProviderClass secret 이름
+                  key: username # 키 이름
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wngnl-secret # SecretProviderClass secret 이름
+                  key: password # 키 이름
+            - name: MYSQL_PORT # 환경변수 정의
+              value: '3306'
+              
+          resources:
+            requests:
+              memory: "250Mi"
+              cpu: "500m"
+            limits:
+              memory: "250Mi"
+              cpu: "500m"
+          volumeMounts:
+          - name: secrets-store-inline
+            mountPath: "/mnt/secrets-store"
+            readOnly: true

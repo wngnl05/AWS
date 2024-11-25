@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <deployment 이름>
+  namespace: <namespace 이름>
+  annotations:
+    reloader.stakater.com/auto: "true"
+  labels:
+    <key> : <value>  # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+spec:
+  replicas: <생성할 파드 수>
+  selector:
+    matchLabels:
+      <key> : <value> # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+  template:
+    metadata:
+      labels:
+        <Pod Key> : <Pod Value> # 각 Pod에 할당되는 레이블
+    spec:
+      nodeSelector: # Fargate Profile을 사용할 시 삭제
+        <Node key>: <Node Value>
+      serviceAccountName: <ServiceAccount 이름>
+      containers:
+        - name: <컨테이너 이름>
+          image: <Docekr 이미지 경로>
+          ports:
+          - containerPort: <애플리케이션 포트>
+          env: 
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: app-secret
+                key: MYSQL_USER
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-secret
+                key: MYSQL_PASSWORD
+          - name: MYSQL_HOST
+            value: ""
+          - name: MYSQL_DBNAME
+            value: ""
+          - name: MYSQL_PORT
+            value: ""
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "250m"
+            limits:
+              memory: "500Mi"
+              cpu: "250m"
+

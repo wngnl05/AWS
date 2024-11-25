@@ -1,0 +1,27 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_ACCOUNT_ID: ""
+    AWS_REGION: ""
+    ECR_NAME: ""
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_NAME
+  build:
+    commands:
+      - docker build -t $ECR_NAME .
+      - UNIQUE_BUILD_ID=$(echo $CODEBUILD_BUILD_ID | cut -d ':' -f 2)
+      - docker tag $ECR_NAME:latest $REPOSITORY_URI:$UNIQUE_BUILD_ID
+      - docker push $REPOSITORY_URI:$UNIQUE_BUILD_ID
+  post_build:
+    commands:
+      - jq --arg imageUri "$REPOSITORY_URI:$UNIQUE_BUILD_ID" '.containerDefinitions[0].image = $imageUri' taskdef.json > updated-taskdef.json
+      - mv updated-taskdef.json taskdef.json
+artifacts:
+  files:
+    - 'taskdef.json'
+    - 'appspec.yaml'

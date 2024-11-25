@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: <rollout 이름>
+  namespace: <namespace 이름>
+  labels:
+    <Pod key> : <Pod value> 
+spec:
+  replicas: <생성할 파드 수>
+  selector:
+    matchLabels:
+      <Pod key> : <Pod value>
+  template:
+    metadata:
+      labels:
+        <Pod Key> : <Pod Value>
+    spec:
+      containers:
+        - name: <컨테이너 이름>
+          image: <Docekr 이미지 경로>
+          ports:
+          - containerPort: <애플리케이션 포트>
+          imagePullPolicy: Always  # 이미지를 항상 새로 가져오도록 설정
+  strategy:
+    blueGreen:
+      activeService: blue-green-svc
+      autoPromotionEnabled: true

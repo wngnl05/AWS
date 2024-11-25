@@ -1,0 +1,8 @@
+version: 0.0
+os: linux
+
+hooks:
+  ApplicationStart:
+    - location: script/ec2_deploy.sh
+      timeout: 180
+      runas: root

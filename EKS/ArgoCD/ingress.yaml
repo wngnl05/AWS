@@ -1,0 +1,38 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: blue-green-svc
+  namespace: app
+spec:
+  selector:
+    wsi: app 
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: <ingress 이름>
+  namespace: <네임스페이스 이름>
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: <ALB 이름>
+    alb.ingress.kubernetes.io/scheme: #internet-facing #internal
+    alb.ingress.kubernetes.io/subnets: <서브넷 아이디 or 이름>, <서브넷 아이디 or 이름>
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: <>
+
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: <서비스 이름>
+            port:
+              number: 80

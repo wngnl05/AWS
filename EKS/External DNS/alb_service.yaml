@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: <이름>
+  namespace: <네임스페이스 이름>
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: <Route53 호스팅 영역 이름>
+spec:
+  selector:
+    <key>: <value>
+  ports:
+  - port: 80
+    targetPort: <어플리케이션 포트>
+    protocol: TCP
+  type: NodePort

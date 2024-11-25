@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wsi-dpm
+  namespace: wsi-ns
+  labels:
+    wsi: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      wsi: app
+  template:
+    metadata:
+      labels:
+        wsi: app
+    spec:
+      nodeSelector:
+        wsi: app
+      containers:
+        - name: wsi-cnt
+          image: <이미지>
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: "500m"
+            requests:
+              cpu: "200m"
+          volumeMounts:
+            - name: app-log
+              mountPath: /logs
+        - name: fluent-bit
+          image: amazon/aws-for-fluent-bit:latest
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: AWS_ACCESS_KEY_ID
+              value: "<키>"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "<키>"
+          resources:
+            limits:
+              memory: "200Mi"
+            requests:
+              cpu: "200m"
+              memory: "100Mi"
+          volumeMounts:
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc/
+            - name: app-log
+              mountPath: /logs
+              readOnly: true
+      volumes:
+        - name: fluent-bit-config
+          configMap:
+            name: fluent-bit-config
+        - name: app-log
+          emptyDir: {}
+      terminationGracePeriodSeconds: 10

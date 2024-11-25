@@ -1,0 +1,20 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - <ECR 자격 인증 명령어>
+      - ECR_URL=<ECR URI>
+      
+      - COMMIT_ID=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - docker build -t $ECR_URL:$COMMIT_ID .
+  post_build:
+    commands:
+      - docker push $ECR_URL:$COMMIT_ID
+      - sed -i "s/<IMAGE_TAG>/$COMMIT_ID/g" script/ec2_deploy.sh
+
+artifacts:
+  files:
+    - appspec.yml
+    - script/*

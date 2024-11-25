@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: <deployment 이름>
+  namespace: <namespace 이름>
+  labels:
+    <key> : <value>  # fargate profile 라벨
+    
+spec:
+  replicas: <생성할 파드 수>
+  selector:
+    matchLabels:
+      <key> : <value> # fargate profile 라벨
+      
+  template:
+    metadata:
+      labels:
+        <Pod Key> : <Pod Value> # fargate profile 라벨
+        
+    spec:
+        
+      serviceAccountName: <ServiceAccount 이름>
+      containers:
+        - name: <컨테이너 이름>
+          image: <Docekr 이미지 경로>
+          ports:
+          - containerPort: <애플리케이션 포트>
+
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m

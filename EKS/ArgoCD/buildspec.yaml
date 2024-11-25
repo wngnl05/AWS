@@ -1,0 +1,38 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - export ECR_URL=""
+      - export ECR_TAG=""
+
+      - export ARGO_USER="admin"
+      - export ARGO_PASSWORD=""
+      - export ARGO_SERVER=""
+      - export ARGO_APP_NAME="app"
+      - export ROLLOUT_NAME="blue-green-app"
+
+      # Amazon ECR에 로그인
+      - <ECR 인증>
+      # Argo CD CLI 설치
+      - curl -LO https://github.com/argoproj/argo-cd/releases/download/v1.4.2/argocd-linux-amd64
+      - chmod u+x argocd-linux-amd64
+      - sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+      - export PATH=/usr/local/bin:$PATH
+      - echo 'export PATH=/usr/local/bin:$PATH' >> ~/.bashrc
+
+  build:
+    commands:
+      # Docker 이미지 빌드
+      - docker build -t $ECR_URL .
+      # Docker 이미지에 빌드 ID 태그 추가
+      - docker tag $ECR_URL:latest $ECR_URL:$ECR_TAG
+      - docker push $ECR_URL:$ECR_TAG
+
+      # Argo CD에 로그인
+      - argocd login ${ARGO_SERVER} --username ${ARGO_USER} --password ${ARGO_PASSWORD} --insecure
+
+  post_build:
+    commands:
+      # Argo CD CLI를 통해 애플리케이션 동기화
+      - argocd app sync ${ARGO_APP_NAME} --prune

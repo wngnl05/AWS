@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: <deployment 이름>
+  namespace: <namespace 이름>
+  labels:
+    <key> : <value>  # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+    
+spec:
+  replicas: <생성할 파드 수>
+  selector:
+    matchLabels:
+      <key> : <value> # Deployment가 관리하는 Pod를 선택하기 위한 레이블
+      
+  template:
+    metadata:
+      labels:
+        <Pod Key> : <Pod Value> # 각 Pod에 할당되는 레이블
+
+    spec:
+      nodeSelector:
+        <Node key>: <Node Value>
+
+      serviceAccountName: <ServiceAccount 이름>
+      containers:
+      - name: <컨테이너 이름>
+        image: <Docekr 이미지 경로>
+        startupProbe:
+          httpGet:
+            path: /health  # 상태 확인 경로
+            port: 80
+          initialDelaySeconds: 2 # 어플리케이션이 시작될때까지 기다리는 시간
+          periodSeconds: 5 # Healthcheck 요청을 보내는 주기(Interval)입니다.
+          timeoutSeconds: 3 # Healthcheck 요청의 타임아웃 값입니다.
+          failureThreshold: 3 # 3번 이상 실패하면 파드를 재시작합니다.
+          successThreshold: 1 # 1번 이상 성공하면 Running 상태로 넘어갑니다.      
+
+      terminationGracePeriodSeconds: 60 # 상태 확인 실패 시 파드 60초 뒤에 종료

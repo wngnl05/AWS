@@ -1,0 +1,66 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: blue-green-app
+  namespace: app
+  labels:
+    wsi: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      wsi: app
+  template:
+    metadata:
+      labels:
+        wsi: app
+    spec:
+      containers:
+        - name: wsi-ctn
+          image: <>
+          ports:
+          - containerPort: 8080
+          imagePullPolicy: Always  # 이미지를 항상 새로 가져오도록 설정
+  strategy:
+    blueGreen:
+      activeService: blue-green-svc
+      autoPromotionEnabled: true
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: blue-green-svc
+  namespace: app
+spec:
+  selector:
+    wsi: app 
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blue-green-ingress
+  namespace: app
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: gwangju-blue-green-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/subnets: skills-pub-a, skills-pub-b
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
+
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: blue-green-svc
+            port:
+              number: 80

@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a
+  namespace: app
+  labels:
+    service: a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: a
+  template:
+    metadata:
+      labels:
+        service: a
+    spec:
+      nodeSelector:
+        skills: app
+      containers:
+        - name: skills-ctn
+          image: <Docker URL>
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+        - name: fluent-bit-sidecar
+          image: fluent/fluent-bit:latest
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+            - name: fluent-bit-sidecar-a-config
+              mountPath: /fluent-bit/etc/
+      volumes:
+        - name: data
+          hostPath:
+            path: /log
+        - name: fluent-bit-sidecar-a-config
+          configMap:
+            name: fluent-bit-sidecar-a-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b
+  namespace: app
+  labels:
+    service: b
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: b
+  template:
+    metadata:
+      labels:
+        service: b
+    spec:
+      nodeSelector:
+        skills: app
+      containers:
+        - name: skills-ctn
+          image: <Docker URL>
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+        - name: fluent-bit-sidecar
+          image: fluent/fluent-bit:latest
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+            - name: fluent-bit-sidecar-b-config
+              mountPath: /fluent-bit/etc/
+      volumes:
+        - name: data
+          hostPath:
+            path: /log
+        - name: fluent-bit-sidecar-b-config
+          configMap:
+            name: fluent-bit-sidecar-b-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+  namespace: app
+  labels:
+    service: c
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: c
+  template:
+    metadata:
+      labels:
+        service: c
+    spec:
+      nodeSelector:
+        skills: app
+      containers:
+        - name: skills-ctn
+          image: <Docker URL>
+          ports:
+          - containerPort: 8080
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+        - name: fluent-bit-sidecar
+          image: fluent/fluent-bit:latest
+          volumeMounts:
+            - name: data
+              mountPath: /log/
+            - name: fluent-bit-sidecar-c-config
+              mountPath: /fluent-bit/etc/
+      volumes:
+        - name: data
+          hostPath:
+            path: /log
+        - name: fluent-bit-sidecar-c-config
+          configMap:
+            name: fluent-bit-sidecar-c-config

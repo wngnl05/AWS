@@ -1,0 +1,57 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: <클러스터 이름>
+  region: <리전>
+
+vpc:
+  id: "<vpc 아이디>"  # 클러스터가 속한 VPC의 ID
+  subnets:
+    private:
+      ap-northeast-2a:
+        id: "<서브넷 아이디>"  # 서브넷의 ID
+      ap-northeast-2b:
+        id: "<서브넷 아이디>"  # 서브넷의 ID
+  securityGroup: "<보안그룹 아이디>"  # VPC의 보안 그룹 ID
+
+managedNodeGroups:
+  - name: <노드그룹 이름>
+    instanceName: <노드 이름>
+    labels: { <key>: <value> }
+    tags: { <key>: <value> }
+    instanceType: <인스턴스 타입>
+    amiFamily: Bottlerocket
+    minSize: 2
+    maxSize: 20
+    desiredCapacity: 2
+    privateNetworking: true
+    subnets:
+     - <서브넷 아이디>  # 서브넷 ID
+     - <서브넷 아이디>  # 서브넷 ID
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        awsLoadBalancerController: true
+        cloudWatch: true
+
+  - name: <노드그룹 이름>
+    instanceName: <노드 이름>
+    labels: { <key>: <value> }
+    tags: { <key>: <value> }
+    instanceType: <인스턴스 타입>
+    amiFamily: Bottlerocket
+    minSize: 2
+    maxSize: 20
+    desiredCapacity: 2
+    privateNetworking: true
+    subnets:
+     - <서브넷 아이디>  # 서브넷 ID
+     - <서브넷 아이디>  # 서브넷 ID
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        autoScaler: true
+        awsLoadBalancerController: true
+        cloudWatch: true

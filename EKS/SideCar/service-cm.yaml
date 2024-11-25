@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-sidecar-a-config
+  namespace: app
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush               1
+        Log_Level           info
+        Daemon              off
+    [INPUT]
+        Name                tail
+        Path                /log/*.log
+        Tag                 service-a
+        Refresh_Interval    10
+        Mem_Buf_Limit       50MB   
+        Skip_Long_Lines     On      
+    [OUTPUT]
+        Name                forward
+        Match               *
+        Host                <서비스 IP>
+        Port                24224
+        Retry_Limit         False
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-sidecar-b-config
+  namespace: app
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush               1
+        Log_Level           info
+        Daemon              off
+    [INPUT]
+        Name                tail
+        Path                /log/*.log
+        Tag                 service-a
+        Refresh_Interval    10
+        Mem_Buf_Limit       50MB   
+        Skip_Long_Lines     On      
+    [OUTPUT]
+        Name                forward
+        Match               *
+        Host                <서비스 IP>
+        Port                24225
+        Retry_Limit         False
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-sidecar-c-config
+  namespace: app
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush               1
+        Log_Level           info
+        Daemon              off
+    [INPUT]
+        Name                tail
+        Path                /log/*.log
+        Tag                 service-a
+        Refresh_Interval    10
+        Mem_Buf_Limit       50MB   
+        Skip_Long_Lines     On      
+    [OUTPUT]
+        Name                forward
+        Match               *
+        Host                <서비스 IP>
+        Port                24226
+        Retry_Limit         False
